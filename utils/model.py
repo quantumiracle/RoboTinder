@@ -17,13 +17,14 @@ from .fc_network import JitFCNetwork, FCNetwork
 from torch.utils.tensorboard import SummaryWriter
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
-# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-device = 'cpu'
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+#device = 'cpu'
 
 class RewardModel():
     def __init__(self,
-                 hidden_size=(512, 512, 512),
+                 hidden_size=(512, 512, 512, 128, 32),
                  frame_num=4,
+                 prev_iter_checkpoint=None,
                  state_only=False,
                  itr = 100,
                  save_logs=False,
@@ -39,10 +40,13 @@ class RewardModel():
         obs_dim = 24
         act_dim = 20
         if state_only:
-            self.model = JitFCNetwork(frame_num*obs_dim, 1, hidden_sizes=hidden_size, output_nonlinearity='tanh').to(device)
+            self.model = JitFCNetwork(frame_num*obs_dim, 1, hidden_sizes=hidden_size, output_nonlinearity='tanh', device=device).to(device)
         else:
-            self.model = JitFCNetwork(frame_num*(obs_dim+act_dim), 1, hidden_sizes=hidden_size, output_nonlinearity='tanh').to(device)
+            self.model = JitFCNetwork(frame_num*(obs_dim+act_dim), 1, hidden_sizes=hidden_size, output_nonlinearity='tanh', device=device).to(device)
 
+        if prev_iter_checkpoint is not None:
+            self.model = torch.jit.load(prev_iter_checkpoint)
+        
         self.itr = itr
 
         self.input_normalization = input_normalization
@@ -51,8 +55,8 @@ class RewardModel():
                 self.input_normalization = None
         self.writer = SummaryWriter(f"runs/{log_dir}")
         # Loss function
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-2)
-        self.scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=500, gamma=0.5)
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=1e-3)
+        self.scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=1000, gamma=0.5)
 
         self.good_samples = None
         self.bad_samples = None
@@ -86,7 +90,7 @@ class RewardModel():
                     self.writer.add_scalar(f"metric/loss", loss, i)
 
                 if i % 100 == 0:
-                    self.jit_save_model(path=model_path+f'model_{self.frame_num}')
+                    self.jit_save_model(path=model_path+f'model_{self.frame_num}_gpu')
                     print(f"Step: {i}/{self.itr}  |  Loss: {loss}")
             
 
@@ -104,7 +108,7 @@ class RewardModel():
                     self.writer.add_scalar(f"metric/loss", loss, i)
 
                 if i % 100 == 0:
-                    self.jit_save_model(path=model_path+f'model_{self.frame_num}')
+                    self.jit_save_model(path=model_path+f'model_{self.frame_num}_gpu')
                     print(f"Step: {i}/{self.itr}  |  Loss: {loss}")
 
     def save_model(self, path):
