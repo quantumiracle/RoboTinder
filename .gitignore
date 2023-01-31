@@ -1,8 +1,9 @@
 *data/
+model/
 *.mp4
 *.pkl
 *.zip
 robotinder/
 runs/
 *.pt
-
+*.csv

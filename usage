@@ -1,2 +1,7 @@
+cd robotinder-data/google_drive_data
+python rawtoprocessed.py
+python split_zip.py
+upload split_processed/ data to google drive
+
 local run:
 streamlit run streamlit_app.py --server.fileWatcherType none

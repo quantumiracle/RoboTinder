@@ -9,7 +9,10 @@ from common import frame_number, iter
 
 def get_data(verbose=True):
     df = pd.read_csv(f'crowdsourced-robotinder-demo/flag_data{iter}.csv')
-    df.columns = ['env_name', 'user_choice', 'left_video', 'right_video', 'time'] # add column names
+    if int(iter) > 2:
+        df.columns = ['env_name', 'user_choice', 'left_video', 'right_video', 'time', 'user_id'] # add column names
+    else:
+        df.columns = ['env_name', 'user_choice', 'left_video', 'right_video', 'time'] # add column names
     print(df.head(5))
     print(f'total number of samples: {len(df.index)}')
 
@@ -93,6 +96,8 @@ def get_data(verbose=True):
 data = get_data() # return: {'good': data, 'bad': data}, data shape: [batch, stack_size*(obs_dim+action_dim)]
 print(data['good'].shape, data['bad'].shape)
 
+import os
+os.makedirs(f'processed_data/itr{iter}', exist_ok=True)
 with open(f'processed_data/itr{iter}/processed_data_{frame_number}.pkl', 'wb') as f:
     pickle.dump(data, f)
 
