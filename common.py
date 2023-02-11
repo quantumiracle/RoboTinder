@@ -1,2 +1,2 @@
-frame_number = 8
-iter = 3  # RM loop iteration
+frame_number = 4
+iter = 4  # RM loop iteration

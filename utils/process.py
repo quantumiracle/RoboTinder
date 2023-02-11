@@ -8,7 +8,7 @@ def get_traj_from_video(video_info):
     video_name = video_info.split('/')[-1]
     traj_name = video_name.replace('.mp4', '.pkl')
     traj_name = traj_name.replace('video', 'traj')
-    data_path = 'robotinder/robotinder-data/google_drive_data/raw/'
+    data_path = 'google_drive_data/raw/'
     try:
         traj_file_path = list(Path(data_path).rglob(traj_name))[0]
         with open(traj_file_path, 'rb') as f:
