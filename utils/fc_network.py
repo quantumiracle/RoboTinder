@@ -34,8 +34,8 @@ class JitFCNetwork(torch.jit.ScriptModule):
         self.act_dim = act_dim
         assert type(hidden_sizes) == tuple
         self.layer_sizes = (obs_dim, ) + hidden_sizes + (act_dim, )
-        self.set_transformations(in_shift, in_scale, out_shift, out_scale)
         self.device = device
+        self.set_transformations(in_shift, in_scale, out_shift, out_scale)
 
         # hidden layers
         self.fc_layers = nn.ModuleList([nn.Linear(self.layer_sizes[i], self.layer_sizes[i+1]) \
@@ -63,10 +63,10 @@ class JitFCNetwork(torch.jit.ScriptModule):
                            out_shift=out_shift,
                            out_scale=out_scale
                           )
-        self.in_shift  = torch.from_numpy(np.float32(in_shift)).to(self.device) if in_shift is not None else torch.zeros(self.obs_dim)
-        self.in_scale  = torch.from_numpy(np.float32(in_scale)).to(self.device) if in_scale is not None else torch.ones(self.obs_dim)
-        self.out_shift = torch.from_numpy(np.float32(out_shift)).to(self.device) if out_shift is not None else torch.zeros(self.act_dim)
-        self.out_scale = torch.from_numpy(np.float32(out_scale)).to(self.device) if out_scale is not None else torch.ones(self.act_dim)
+        self.in_shift  = torch.from_numpy(np.float32(in_shift)).to(self.device) if in_shift is not None else torch.zeros(self.obs_dim).to(self.device)
+        self.in_scale  = torch.from_numpy(np.float32(in_scale)).to(self.device) if in_scale is not None else torch.ones(self.obs_dim).to(self.device)
+        self.out_shift = torch.from_numpy(np.float32(out_shift)).to(self.device) if out_shift is not None else torch.zeros(self.act_dim).to(self.device)
+        self.out_scale = torch.from_numpy(np.float32(out_scale)).to(self.device) if out_scale is not None else torch.ones(self.act_dim).to(self.device)
     
     @torch.jit.script_method
     def forward(self, x):

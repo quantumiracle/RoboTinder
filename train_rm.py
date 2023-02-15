@@ -22,8 +22,10 @@ for i in range(1, iter+1): # load data from all previous and current iterations
 print('final training data shape: ', good_data.shape, bad_data.shape)
 
 
-# train
+# train from pretrained
 reward_model = RewardModel(frame_num=frame_number, itr=50000, prev_iter_checkpoint=f'./model/itr{iter-1}/model_{frame_number}_gpu.pt', state_only=False, save_logs=True)
+# train from scratch
+# reward_model = RewardModel(frame_num=frame_number, itr=50000, state_only=False, save_logs=True)
 reward_model.train(good_samples=good_data, bad_samples=bad_data, model_path=f'./model/itr{iter}/')
 
 
